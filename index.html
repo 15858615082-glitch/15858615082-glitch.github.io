@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="嗯嗯日记">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="description" content="记录每天的排便情况，关注肠道健康">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>嗯嗯日记</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f0f1a;--surface:#1a1a2e;--surface2:#232346;--surface3:#2d2d54;--primary:#7c6ff7;--primary-dim:#5a4bd1;--accent:#f7a66f;--text:#e8e8f0;--text2:#a0a0b8;--text3:#666680;--border:#2a2a48;--danger:#f76f6f;--radius:14px;--radius-sm:10px;--safe-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC",sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-font-smoothing:antialiased}
+.app-shell{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;position:relative;overflow:hidden}
+.app-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding-top:max(16px,env(safe-area-inset-top,16px))}
+.app-header h1{font-size:22px;font-weight:700;letter-spacing:-.3px;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header-badge{font-size:12px;color:var(--text3);background:var(--surface2);padding:4px 10px;border-radius:20px;transition:all .3s ease}
+.tab-content{flex:1;overflow:hidden;position:relative}
+.tab-pane{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 16px 16px;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.tab-pane.active{opacity:1;pointer-events:auto;position:relative;height:100%}
+.tab-pane::-webkit-scrollbar{width:4px}.tab-pane::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:4px}
+.tab-bar{display:flex;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;padding-bottom:var(--safe-bottom)}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 6px;background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;transition:color .2s;-webkit-tap-highlight-color:transparent;position:relative}
+.tab-btn .tab-icon{font-size:22px;line-height:1}.tab-btn.active{color:var(--primary)}.tab-btn:active{opacity:.6}
+.tab-btn .tab-dot{position:absolute;top:4px;right:50%;margin-right:-16px;width:8px;height:8px;border-radius:50%;background:var(--accent);opacity:0;transform:scale(0);transition:all .3s ease}
+.tab-btn .tab-dot.show{opacity:1;transform:scale(1)}
+.section-label{font-size:13px;color:var(--text2);margin-bottom:10px;font-weight:500;display:flex;align-items:center;gap:6px}
+.datetime-area{display:flex;gap:10px;margin-bottom:20px;align-items:center}
+.datetime-area input[type=date],.datetime-area input[type=time]{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit;-webkit-appearance:none;appearance:none;color-scheme:dark;outline:none;transition:border-color .2s}
+.datetime-area input[type=date]:focus,.datetime-area input[type=time]:focus{border-color:var(--primary)}
+.datetime-area input[type=date]::-webkit-calendar-picker-indicator,.datetime-area input[type=time]::-webkit-calendar-picker-indicator{filter:invert(.7);cursor:pointer}
+.stool-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.stool-card{background:var(--surface2);border:2px solid transparent;border-radius:var(--radius);padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s ease;position:relative;overflow:hidden}
+.stool-card::after{content:'';position:absolute;inset:0;background:var(--primary);opacity:0;transition:opacity .15s}
+.stool-card:active::after{opacity:.08}
+.stool-card.selected{border-color:var(--primary);background:rgba(124,111,247,.12)}
+.stool-icon{font-size:28px;flex-shrink:0;width:36px;text-align:center;position:relative;z-index:1}
+.stool-info{flex:1;min-width:0;position:relative;z-index:1}
+.stool-type{font-size:12px;font-weight:600;color:var(--primary)}
+.stool-desc{font-size:12px;color:var(--text2);line-height:1.3;margin-top:2px}
+.meta-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.meta-tag{padding:8px 16px;border-radius:20px;background:var(--surface2);border:1.5px solid transparent;font-size:13px;color:var(--text2);cursor:pointer;transition:all .15s ease;-webkit-tap-highlight-color:transparent}
+.meta-tag.selected{border-color:var(--primary);color:var(--primary);background:rgba(124,111,247,.1)}
+.meta-tag:active{transform:scale(.95)}
+.notes-area{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:14px;font-family:inherit;resize:none;min-height:72px;margin-bottom:16px;outline:none;transition:border-color .2s}
+.notes-area:focus{border-color:var(--primary)}
+.save-btn{width:100%;padding:16px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--primary),var(--primary-dim));color:#fff;font-size:17px;font-weight:600;cursor:pointer;transition:all .15s ease;letter-spacing:.5px;-webkit-tap-highlight-color:transparent}
+.save-btn:active{transform:scale(.97);opacity:.9}
+.toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%)translateY(20px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 24px;border-radius:var(--radius-sm);font-size:14px;opacity:0;pointer-events:none;transition:all .3s ease;z-index:100;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,.4);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%)translateY(0)}
+.history-list{display:flex;flex-direction:column;gap:8px}
+.history-empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.history-empty .empty-icon{font-size:48px;margin-bottom:12px}
+.history-empty p{font-size:14px;line-height:1.5}
+.history-item{background:var(--surface2);border-radius:var(--radius);padding:14px;display:flex;align-items:flex-start;gap:12px;animation:slideIn .25s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hist-icon{font-size:28px;flex-shrink:0;width:36px;text-align:center;padding-top:2px}
+.hist-body{flex:1;min-width:0}
+.hist-header-row{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.hist-date{font-size:14px;font-weight:600}
+.hist-time{font-size:12px;color:var(--text3)}
+.hist-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.hist-meta-tag{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--surface3);color:var(--text2)}
+.hist-detail{font-size:13px;color:var(--text2);line-height:1.4}
+.hist-delete{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:8px 4px;flex-shrink:0;transition:color .15s;-webkit-tap-highlight-color:transparent}
+.hist-delete:active{color:var(--danger)}
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.confirm-overlay.show{opacity:1;pointer-events:auto}
+.confirm-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:280px;text-align:center}
+.confirm-box p{margin-bottom:20px;font-size:15px;line-height:1.5}
+.confirm-actions{display:flex;gap:10px}
+.confirm-btn{flex:1;padding:12px;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s ease;-webkit-tap-highlight-color:transparent}
+.confirm-btn.cancel{background:var(--surface3);color:var(--text2)}.confirm-btn.cancel:active{opacity:.7}
+.confirm-btn.danger{background:var(--danger);color:#fff}.confirm-btn.danger:active{opacity:.7}
+.stats-section{margin-bottom:20px}.stats-section:last-child{margin-bottom:0}
+.stats-card{background:var(--surface2);border-radius:var(--radius);padding:18px}
+.stat-big{font-size:40px;font-weight:700;color:var(--primary)}
+.stat-label{font-size:13px;color:var(--text2);margin-top:4px}
+.stat-bars{display:flex;gap:4px;align-items:flex-end;height:120px;padding-top:10px}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.bar{width:100%;max-width:28px;border-radius:4px 4px 0 0;min-height:4px;opacity:.8;transition:height .5s ease}
+.bar-label{font-size:10px;color:var(--text3)}
+.bar-count{font-size:10px;color:var(--text2);font-weight:600}
+.week-strip{display:flex;gap:4px;margin-top:12px}
+.week-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.week-dot{width:20px;height:20px;border-radius:50%;background:var(--surface3);transition:background .3s ease}
+.week-dot.has{background:var(--primary);box-shadow:0 0 8px rgba(124,111,247,.4)}
+.week-label{font-size:10px;color:var(--text3)}
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.month-nav button{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;padding:8px 12px;transition:color .15s}
+.month-nav button:active{color:var(--primary)}
+.month-nav .month-label{font-size:16px;font-weight:600}
+.install-banner{display:none;align-items:center;gap:10px;background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;flex-shrink:0;font-size:13px;color:var(--text2)}
+.install-banner.show{display:flex}
+.install-banner .btn-icon{background:var(--surface3);border:none;color:var(--text2);width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0}
+.install-banner .btn-install{margin-left:auto;background:var(--primary);border:none;color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class=app-shell id=app>
+<div class=install-banner id=installBanner>
+<span>⬇️</span>
+<span>安装「嗯嗯日记」到桌面，随时使用</span>
+<button class="btn-icon" id=installDismiss>✕</button>
+<button class="btn-install" id=installBtn>安装</button>
+</div>
+<header class=app-header>
+<h1>💩 嗯嗯日记</h1>
+<span class=header-badge id=todayCount>今天 0 次</span>
+</header>
+<div class=tab-content>
+<div class="tab-pane active" id=tabLog>
+<div class=section-label>📅 时间</div>
+<div class=datetime-area>
+<input type=date id=logDate><input type=time id=logTime>
+</div>
+<div class=section-label>📋 布里斯托大便分类</div>
+<div class=stool-grid id=stoolGrid></div>
+<div class=section-label>🎨 颜色</div>
+<div class=meta-row id=colorRow></div>
+<div class=section-label>😌 感受</div>
+<div class=meta-row id=feelRow></div>
+<div class=section-label>📝 备注</div>
+<textarea class=notes-area id=logNotes placeholder="记录一下今天的状态…" maxlength=200></textarea>
+<button class=save-btn id=saveBtn>✅ 记录今天</button>
+</div>
+<div class=tab-pane id=tabHistory><div class=history-list id=historyList></div></div>
+<div class=tab-pane id=tabStats>
+<div class=month-nav><button id=prevMonth>‹</button><span class=month-label id=statsMonthLabel></span><button id=nextMonth>›</button></div>
+<div class=stats-section><div class=stats-card><div class=stat-big id=statTotal>0</div><div class=stat-label>本月排便次数</div><div class=week-strip id=weekStrip></div></div></div>
+<div class=stats-section><div class=stats-card><div class=stat-label style="margin-bottom:8px">布里斯托类型分布</div><div class=stat-bars id=statBars></div></div></div>
+</div>
+</div>
+<div class=toast id=toast></div>
+<div class=confirm-overlay id=confirmOverlay>
+<div class=confirm-box><p id=confirmMsg>确定要删除这条记录吗？</p><div class=confirm-actions><button class="confirm-btn cancel" id=confirmCancel>取消</button><button class="confirm-btn danger" id=confirmOk>删除</button></div></div>
+</div>
+<div class=tab-bar>
+<button class="tab-btn active" data-tab=tabLog><span class=tab-icon>📝</span><span class=tab-dot></span>记录</button>
+<button class=tab-btn data-tab=tabHistory><span class=tab-icon>📋</span><span class=tab-dot></span>历史</button>
+<button class=tab-btn data-tab=tabStats><span class=tab-icon>📊</span><span class=tab-dot></span>统计</button>
+</div>
+</div>
+<script>
+const SK='poop_logs',C=[{id:'brown',lb:'棕色',ej:'🟤'},{id:'green',lb:'绿色',ej:'🟢'},{id:'yellow',lb:'黄色',ej:'🟡'},{id:'black',lb:'黑色',ej:'⚫'},{id:'red',lb:'红色',ej:'🔴'},{id:'white',lb:'白色',ej:'⚪'}],F=[{id:'easy',lb:'轻松'},{id:'normal',lb:'正常'},{id:'hard',lb:'费力'},{id:'pain',lb:'疼痛'}],T=[{t:1,ej:'🔴',ds:'硬球状，像坚果'},{t:2,ej:'🌭',ds:'香肠状，表面凹凸'},{t:3,ej:'🥖',ds:'香肠状，表面有裂痕'},{t:4,ej:'🍌',ds:'光滑柔软的香肠状'},{t:5,ej:'🍟',ds:'软块状，边缘清晰'},{t:6,ej:'🥣',ds:'蓬松糊状，边缘不整'},{t:7,ej:'💧',ds:'水状，无固体块'}],DL=['日','一','二','三','四','五','六'];
+let logs=[],selT=null,selC=null,selF=null,sm=new Date,dt=null,deferredPrompt=null;
+function ld(){try{const r=localStorage.getItem(SK);return r?JSON.parse(r):[]}catch{return[]}}
+function sv(){localStorage.setItem(SK,JSON.stringify(logs))}
+function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+logs=ld();
+function utc(){const t=new Date,s=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');document.getElementById('todayCount').textContent='今天 '+logs.filter(l=>l.date===s).length+' 次'}
+function rsg(){const g=document.getElementById('stoolGrid');g.innerHTML='';T.forEach(t=>{const c=document.createElement('div');c.className='stool-card'+(selT===t.t?' selected':'');c.innerHTML='<div class=stool-icon>'+t.ej+'</div><div class=stool-info><div class=stool-type>Type '+t.t+'</div><div class=stool-desc>'+t.ds+'</div></div>';c.addEventListener('click',()=>{selT=t.t;document.querySelectorAll('.stool-card').forEach(x=>x.classList.remove('selected'));c.classList.add('selected')});g.appendChild(c)})}
+function rmr(){const cr=document.getElementById('colorRow');cr.innerHTML='';C.forEach(c=>{const t=document.createElement('span');t.className='meta-tag'+(selC===c.id?' selected':'');t.textContent=c.ej+' '+c.lb;t.addEventListener('click',()=>{selC=c.id;document.querySelectorAll('#colorRow .meta-tag').forEach(x=>x.classList.remove('selected'));t.classList.add('selected')});cr.appendChild(t)});const fr=document.getElementById('feelRow');fr.innerHTML='';F.forEach(f=>{const t=document.createElement('span');t.className='meta-tag'+(selF===f.id?' selected':'');t.textContent=f.lb;t.addEventListener('click',()=>{selF=f.id;document.querySelectorAll('#feelRow .meta-tag').forEach(x=>x.classList.remove('selected'));t.classList.add('selected')});fr.appendChild(t)})}
+function idt(){const n=new Date;document.getElementById('logDate').value=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');document.getElementById('logTime').value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')}
+function se(){if(!selT){st('请选择大便类型');return}const e={id:gid(),date:document.getElementById('logDate').value,time:document.getElementById('logTime').value,type:selT,color:selC||null,feel:selF||null,notes:document.getElementById('logNotes').value.trim(),createdAt:Date.now()};logs.unshift(e);sv();utc();rf();st('✅ 记录已保存');sw('tabHistory')}
+function rf(){idt();selT=null;selC=null;selF=null;document.getElementById('logNotes').value='';document.querySelectorAll('.stool-card').forEach(c=>c.classList.remove('selected'));document.querySelectorAll('#colorRow .meta-tag').forEach(t=>t.classList.remove('selected'));document.querySelectorAll('#feelRow .meta-tag').forEach(t=>t.classList.remove('selected'))}
+let tt=null;function st(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2000)}
+function sw(id){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelector('[data-tab="'+id+'"]').classList.add('active');if(id==='tabHistory')rh();if(id==='tabStats')rst()}
+function rh(){const l=document.getElementById('historyList');if(!logs.length){l.innerHTML='<div class=history-empty><div class=empty-icon>📭</div><p>还没有记录<br>去「记录」页面添加第一条吧</p></div>';return}l.innerHTML='';logs.forEach(e=>{const st=T[e.type-1],cl=e.color?C.find(c=>c.id===e.color):null,fl=e.feel?F.find(f=>f.id===e.feel):null;let mh='';if(cl)mh+='<span class=hist-meta-tag>'+cl.ej+' '+cl.lb+'</span>';if(fl)mh+='<span class=hist-meta-tag>'+fl.lb+'</span>';const it=document.createElement('div');it.className='history-item';it.innerHTML='<div class=hist-icon>'+(st?st.ej:'💩')+'</div><div class=hist-body><div class=hist-header-row><span class=hist-date>'+fd(e.date)+'</span><span class=hist-time>'+e.time+'</span></div><div class=hist-meta>'+mh+'</div>'+(e.notes?'<div class=hist-detail>'+esc(e.notes)+'</div>':'')+'</div><button class=hist-delete data-id="'+e.id+'">✕</button>';it.querySelector('.hist-delete').addEventListener('click',()=>cf(e.id));l.appendChild(it)})}
+function fd(s){const p=s.split('-');return parseInt(p[1])+'月'+parseInt(p[2])+'日'}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function cf(id){dt=id;document.getElementById('confirmMsg').textContent='确定要删除这条记录吗？';document.getElementById('confirmOverlay').classList.add('show')}
+function ed(){if(!dt)return;logs=logs.filter(l=>l.id!==dt);sv();utc();dt=null;document.getElementById('confirmOverlay').classList.remove('show');rh();st('已删除')}
+function rst(){const y=sm.getFullYear(),m=sm.getMonth();document.getElementById('statsMonthLabel').textContent=y+'年'+(m+1)+'月';const ms=y+'-'+String(m+1).padStart(2,'0'),ml=logs.filter(l=>l.date.startsWith(ms));document.getElementById('statTotal').textContent=ml.length;const d=[0,0,0,0,0,0,0];ml.forEach(l=>{if(l.type>=1&&l.type<=7)d[l.type-1]++});const mx=Math.max(...d,1),b=document.getElementById('statBars');b.innerHTML='';d.forEach((c,i)=>{const w=document.createElement('div');w.className='bar-wrap';w.innerHTML='<div class=bar-count>'+c+'</div><div class=bar style="height:'+Math.max(c/mx*100,4)+'%;background:hsl('+(250-i*20)+',70%,'+(55+i*4)+'%)"></div><div class=bar-label>T'+(i+1)+'</div>';b.appendChild(w)});const wk=document.getElementById('weekStrip');wk.innerHTML='';const td=new Date;for(let i=6;i>=0;i--){const d=new Date(td);d.setDate(d.getDate()-i);const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),h=logs.some(l=>l.date===ds),de=document.createElement('div');de.className='week-day';de.innerHTML='<div class=week-dot'+(h?' has':'')+'"></div><div class=week-label>'+DL[d.getDay()]+'</div>';wk.appendChild(de)}}
+function init(){idt();rsg();rmr();utc();document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>sw(b.dataset.tab)));document.getElementById('saveBtn').addEventListener('click',se);document.getElementById('confirmOk').addEventListener('click',ed);document.getElementById('confirmCancel').addEventListener('click',()=>{document.getElementById('confirmOverlay').classList.remove('show');dt=null});document.getElementById('confirmOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget){document.getElementById('confirmOverlay').classList.remove('show');dt=null}});document.getElementById('prevMonth').addEventListener('click',()=>{sm.setMonth(sm.getMonth()-1);rst()});document.getElementById('nextMonth').addEventListener('click',()=>{sm.setMonth(sm.getMonth()+1);rst()});const ib=document.getElementById('installBanner'),ibBtn=document.getElementById('installBtn'),ibDismiss=document.getElementById('installDismiss');window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;ib.classList.add('show')});ibBtn.addEventListener('click',async()=>{if(deferredPrompt){deferredPrompt.prompt();const r=await deferredPrompt.userChoice;if(r.outcome==='accepted'){ib.classList.remove('show')}deferredPrompt=null}});ibDismiss.addEventListener('click',()=>{ib.classList.remove('show');deferredPrompt=null});if('serviceWorker'in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>

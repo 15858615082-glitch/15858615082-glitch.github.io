@@ -1,0 +1,27 @@
+{
+  "name": "嗯嗯日记",
+  "short_name": "嗯嗯日记",
+  "description": "记录每天的排便情况，关注肠道健康",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#1a1a2e",
+  "orientation": "portrait",
+  "categories": ["health", "lifestyle", "utility"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
